@@ -94,7 +94,22 @@ def get_parameter(client, module):
     return changed, nacl['Parameters']
 
 def delete_parameter(client, module):
-    print "delete_parameter"
+    changed = False
+
+    nacl = dict()
+
+    get_nacl = client.get_parameters(
+                  Names=[module.params.get('name')]
+    )
+    if get_nacl['Parameters']:
+      try: 
+        nacl = client.delete_parameter(
+                Name=module.params.get('name')
+        )
+        changed = True
+      except botocore.exceptions.ClientError as e:
+          module.fail_json(msg=str(e))
+    return changed, nacl
 
 def main():
 
