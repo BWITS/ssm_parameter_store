@@ -24,7 +24,7 @@ EXAMPLES = '''
   ssm_parameter_store:
     name: "Hello"
     description: "This is your first key"
-    type: "SecureString"
+    string_type: "SecureString"
     value: "World"
   register: result
 
@@ -60,18 +60,38 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.ec2 import boto3_conn, AnsibleAWSError, ec2_argument_spec, get_aws_connection_info
 
 def create_update_parameter(client, module):
-    print "create_update_parameter"
+    changed = False
+  
+    args = dict(
+              Name=module.params.get('name'),
+              Value=module.params.get('value'),
+              Type=module.params.get('string_type'),
+              Overwrite=module.params.get('overwrite')
+    )
+
+    if module.params.get('description'):
+       args.update(Description=module.params.get('description'))
+
+    if module.params.get('string_type') is 'SecureString':
+       args.update(KeyId=module.params.get('key_id'))   
+
+    try:
+      nacl = client.put_parameter(**args)
+      changed = True
+    except botocore.exceptions.ClientError as e:
+        module.fail_json(msg=str(e))
+    return changed, nacl
 
 def get_parameter(client, module):
     changed = False
     try:
-      parameter = client.get_parameters(
-                  Names=[module.params.get('name')],
-                  WithDecryption=module.params.get('decryption')
+      nacl = client.get_parameters(
+                Names=[module.params.get('name')],
+                WithDecryption=module.params.get('decryption')
       )
     except botocore.exceptions.ClientError as e:
         module.fail_json(msg=str(e))
-    return (changed, parameter)
+    return changed, nacl['Parameters']
 
 def delete_parameter(client, module):
     print "delete_parameter"
@@ -80,13 +100,14 @@ def main():
 
     argument_spec = ec2_argument_spec()
     argument_spec.update(dict(
-        name = dict(required=True),
+        name =        dict(required=True),
         description = dict(required=False),
         value =       dict(required=False),
         state =       dict(default='present', choices=['present', 'absent', 'show']),
-        type =        dict(default='String', choices=['String', 'StringList', 'SecureString']),
+        string_type =   dict(default='String', choices=['String', 'StringList', 'SecureString']),
         decryption =  dict(default=True, type='bool'),
         key_id =      dict(default='aws/ssm'),
+        overwrite =   dict(default=True, type='bool'),
         ),
     )
 
