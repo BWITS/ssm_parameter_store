@@ -31,15 +31,20 @@ EXAMPLES = '''
 - name: Retrieving plain-text secret
   ssm_parameter_store:
     name: "Hello"
-    decryption: True
     state: show
   register: result
 
 - name: Retrieving plain-text secret with custom kms key
   ssm_parameter_store:
     name: "Hello"
-    decryption: True
     key_id: "aws/ssm"
+    state: show
+  register: result
+
+- name: Retrieving secret without decrypted
+  ssm_parameter_store:
+    name: "Hello"
+    decryption: False
     state: show
   register: result
 '''
@@ -80,7 +85,7 @@ def main():
         value =       dict(required=False),
         state =       dict(default='present', choices=['present', 'absent', 'show']),
         type =        dict(default='String', choices=['String', 'StringList', 'SecureString']),
-        decryption =  dict(default=False, type='bool'),
+        decryption =  dict(default=True, type='bool'),
         key_id =      dict(default='aws/ssm'),
         ),
     )
