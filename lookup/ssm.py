@@ -48,7 +48,7 @@ class LookupModule(LookupBase):
             ret.update(response)
 
         if ret['Parameters']:
-            return ret['Parameters'][0]['Value']
+            return [ret['Parameters'][0]['Value']]
         else:
             return None
 
