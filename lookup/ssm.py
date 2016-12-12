@@ -33,22 +33,22 @@ class LookupModule(LookupBase):
         if not HAS_BOTO3:
             raise AnsibleError('botocore and boto3 are required.')
 
-        ret = []
-
         client = boto3.client('ssm')
+
+        ret = {}
 
         for term in terms:
             try:
-                name = kwargs.pop('name', '')
                 response = client.get_parameters(
-                      Names=[
-                        name,
-                      ],
-                      WithDecryption=True|False
+                      Names=[term],
+                      WithDecryption=True
                 )
             except botocore.exceptions.ClientError as e:
                 module.fail_json(msg=str(e))
+            ret.update(response)
 
-            ret.append(response)
+        if ret['Parameters']:
+            return ret['Parameters'][0]['Value']
+        else:
+            return None
 
-        return ret
