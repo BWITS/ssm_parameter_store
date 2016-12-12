@@ -1,4 +1,4 @@
-## ssm_parameter_store
+# ssm_parameter_store
 ansible module to manage key/value in aws parameter store
 
 Target file: library/ssm_parameter_store.py
@@ -55,7 +55,7 @@ http://docs.ansible.com/ansible/dev_guide/developing_modules.html
 
 https://github.com/ansible/ansible-modules-extras/blob/devel/cloud/amazon/ec2_vpc_nacl.py
 
-## parameter lookup plungin
+# Parameter lookup plungin
 ansible lookup plugin to easily get key-value from aws parameter store
 
 Target file: lookup/ssm.py
@@ -64,6 +64,14 @@ Target file: lookup/ssm.py
 
 ```
 - debug: msg="{{ lookup('ssm', 'foo') }}"
+
+Output: 
+
+TASK [debug] *******************************************************************
+ok: [localhost] => {
+    "msg": "Hello World!"
+}
+
 ```
 
 ### Reference:
