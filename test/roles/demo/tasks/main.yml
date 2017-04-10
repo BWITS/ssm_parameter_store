@@ -1,0 +1,15 @@
+- name: Create or update key/vaule pair in aws parameter store
+  ssm_parameter_store:
+    name: "Hello"
+    description: "This is your first key"
+    value: "World"
+
+- name: Retrieving plain-text secret
+  ssm_parameter_store:
+    name: "Hello"
+    state: show
+  register: result
+
+- debug: msg={{ result.nacl_id }}
+
+- debug: msg="{{ lookup('ssm', 'Hello') }}"
