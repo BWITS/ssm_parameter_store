@@ -74,6 +74,18 @@ ok: [localhost] => {
 
 ```
 
+### Tutorials
+
+1) make sure you have configured aws command line
+
+refer: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
+
+2) run the command 
+```
+cd test
+./cmd.sh
+```
+
 ### Reference:
 
 https://docs.ansible.com/ansible/dev_guide/developing_plugins.html#lookup-plugins
