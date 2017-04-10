@@ -11,5 +11,4 @@ install:
   - pip install ansible boto3
 
 script:
-  - cd test
-  - ./cmd.sh
+  - pip install boto3 && cd test && ./cmd.sh
