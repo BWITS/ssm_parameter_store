@@ -27,6 +27,7 @@ except ImportError:
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
+
 class LookupModule(LookupBase):
     def run(self, terms, variables, **kwargs):
 
@@ -40,8 +41,8 @@ class LookupModule(LookupBase):
         for term in terms:
             try:
                 response = client.get_parameters(
-                      Names=[term],
-                      WithDecryption=True
+                    Names=[term],
+                    WithDecryption=True
                 )
             except botocore.exceptions.ClientError as e:
                 module.fail_json(msg=str(e))
@@ -51,4 +52,3 @@ class LookupModule(LookupBase):
             return [ret['Parameters'][0]['Value']]
         else:
             return None
-
