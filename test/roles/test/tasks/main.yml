@@ -9,10 +9,11 @@
     name: "Hello"
     state: absent
 
-- name: Create or update secure key/value pair in aws parameter store
+- name: Create or update secure key/value pair with nominated kms key
   ssm_parameter_store:
     name: "Hello"
     description: "This is your first key"
+    key_id: "alias/demo"
     string_type: "SecureString"
     value: "World"
 
@@ -22,10 +23,17 @@
     state: show
   register: result
 
-- name: Retrieving plain-text secret with custom kms key
+- name: Retrieving plain-text secret with default kms key
   ssm_parameter_store:
     name: "Hello"
     key_id: "aws/ssm"
+    state: show
+  register: result
+
+- name: Retrieving plain-text secret with nominated kms key
+  ssm_parameter_store:
+    name: "Hello"
+    key_id: "alias/demo"
     state: show
   register: result
 

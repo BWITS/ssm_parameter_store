@@ -84,11 +84,19 @@ EXAMPLES = '''
     name: "Hello"
     state: absent
 
-- name: Create or update secure key/value pair in aws parameter store
+- name: Create or update secure key/value pair with default kms key (aws/ssm)
   ssm_parameter_store:
     name: "Hello"
     description: "This is your first key"
     string_type: "SecureString"
+    value: "World"
+
+- name: Create or update secure key/value pair with nominated kms key
+  ssm_parameter_store:
+    name: "Hello"
+    description: "This is your first key"
+    string_type: "SecureString"
+    key_id: "alias/demo"
     value: "World"
 
 - name: Retrieving plain-text secret
@@ -97,10 +105,16 @@ EXAMPLES = '''
     state: show
   register: result
 
-- name: Retrieving plain-text secret with custom kms key
+- name: Retrieving SecureString secret with default kms key (aws/ssm)
   ssm_parameter_store:
     name: "Hello"
-    key_id: "aws/ssm"
+    state: show
+  register: result
+
+- name: Retrieving SecureString secret with nominated kms key
+  ssm_parameter_store:
+    name: "Hello"
+    key_id: "alias/demo"
     state: show
   register: result
 
@@ -128,7 +142,7 @@ get_parameter:
             type: string
             sample: "Hello"
         type:
-            description: The type of parameter. Valid values include the following: String, String list, Secure string..
+            description: The type of parameter. Valid values include [ String, StringList, SecureString ]
             returned: success
             type: string
             sample: "String"
@@ -167,7 +181,7 @@ def create_update_parameter(client, module):
     if module.params.get('description'):
         args.update(Description=module.params.get('description'))
 
-    if module.params.get('string_type') is 'SecureString':
+    if module.params.get('string_type') == 'SecureString':
         args.update(KeyId=module.params.get('key_id'))
 
     try:
