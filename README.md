@@ -84,6 +84,9 @@ refer: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.
 ```
 cd test
 ./cmd.sh
+
+# with verbosse
+./cmd.sh -vvvv
 ```
 
 ### Reference:

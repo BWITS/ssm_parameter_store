@@ -1,8 +1,40 @@
-- name: Create or update key/vaule pair in aws parameter store
+- name: Create or update key/value pair in aws parameter store
   ssm_parameter_store:
     name: "Hello"
     description: "This is your first key"
     value: "World"
+
+- name: Delete the key
+  ssm_parameter_store:
+    name: "Hello"
+    state: absent
+
+- name: Create or update secure key/value pair in aws parameter store
+  ssm_parameter_store:
+    name: "Hello"
+    description: "This is your first key"
+    string_type: "SecureString"
+    value: "World"
+
+- name: Retrieving plain-text secret
+  ssm_parameter_store:
+    name: "Hello"
+    state: show
+  register: result
+
+- name: Retrieving plain-text secret with custom kms key
+  ssm_parameter_store:
+    name: "Hello"
+    key_id: "aws/ssm"
+    state: show
+  register: result
+
+- name: Retrieving secret without decrypted
+  ssm_parameter_store:
+    name: "Hello"
+    decryption: False
+    state: show
+  register: result
 
 - name: Retrieving plain-text secret
   ssm_parameter_store:
