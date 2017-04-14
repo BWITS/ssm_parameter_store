@@ -17,26 +17,27 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-try:
-    import botocore
-    import boto3
-    HAS_BOTO3 = True
-except ImportError:
-    HAS_BOTO3 = False
-
+from ansible.module_utils.ec2 import HAS_BOTO3
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
+
+try:
+    from botocore.exceptions import ClientError
+    import boto3
+except ImportError:
+    pass  # will be captured by imported HAS_BOTO3
 
 
 class LookupModule(LookupBase):
     def run(self, terms, variables, **kwargs):
 
+        ret = {}
+        response = {}
+
         if not HAS_BOTO3:
             raise AnsibleError('botocore and boto3 are required.')
 
         client = boto3.client('ssm')
-
-        ret = {}
 
         for term in terms:
             try:
@@ -44,8 +45,10 @@ class LookupModule(LookupBase):
                     Names=[term],
                     WithDecryption=True
                 )
-            except botocore.exceptions.ClientError as e:
-                module.fail_json(msg=str(e))
+            except ClientError, e:
+                module.fail_json(msg=e.message, exception=traceback.format_exc(),
+                                 **camel_dict_to_snake_dict(e.response))
+
             ret.update(response)
 
         if ret['Parameters']:
