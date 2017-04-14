@@ -42,7 +42,7 @@ options:
       - Creates or modifies an existing parameter
       - Deletes a parameter
     required: false
-    choices: ['present', 'absent', 'show']
+    choices: ['present', 'absent']
     default: present
   string_type:
     description:
@@ -99,31 +99,8 @@ EXAMPLES = '''
     key_id: "alias/demo"
     value: "World"
 
-- name: Retrieving plain-text secret
-  ssm_parameter_store:
-    name: "Hello"
-    state: show
-  register: result
-
-- name: Retrieving SecureString secret with default kms key (aws/ssm)
-  ssm_parameter_store:
-    name: "Hello"
-    state: show
-  register: result
-
-- name: Retrieving SecureString secret with nominated kms key
-  ssm_parameter_store:
-    name: "Hello"
-    key_id: "alias/demo"
-    state: show
-  register: result
-
-- name: Retrieving secret without decrypted
-  ssm_parameter_store:
-    name: "Hello"
-    decryption: False
-    state: show
-  register: result
+- name: recommend to use with ssm lookup plugin
+  debug: msg="{{ lookup('ssm', 'hello') }}"
 '''
 
 RETURN = '''
@@ -157,19 +134,19 @@ delete_parameter:
     type: dictionary
 '''
 
-try:
-    import botocore
-    import boto3
-    HAS_BOTO3 = True
-except ImportError:
-    HAS_BOTO3 = False
-
+from ansible.module_utils.ec2 import HAS_BOTO3
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.ec2 import boto3_conn, AnsibleAWSError, ec2_argument_spec, get_aws_connection_info
+from ansible.module_utils.ec2 import boto3_conn, ec2_argument_spec, get_aws_connection_info
+
+try:
+    from botocore.exceptions import ClientError
+except ImportError:
+    pass  # will be captured by imported HAS_BOTO3
 
 
 def create_update_parameter(client, module):
     changed = False
+    reponse = {}
 
     args = dict(
         Name=module.params.get('name'),
@@ -185,42 +162,54 @@ def create_update_parameter(client, module):
         args.update(KeyId=module.params.get('key_id'))
 
     try:
-        nacl = client.put_parameter(**args)
+        reponse = client.put_parameter(**args)
         changed = True
-    except botocore.exceptions.ClientError as e:
-        module.fail_json(msg=str(e))
-    return changed, nacl
+    except ClientError, e:
+        module.fail_json(msg=e.message, exception=traceback.format_exc(),
+                         **camel_dict_to_snake_dict(e.response))
+
+    return changed, reponse
 
 
 def get_parameter(client, module):
     changed = False
+    reponse = {}
+
     try:
-        nacl = client.get_parameters(
+        reponse = client.get_parameters(
             Names=[module.params.get('name')],
             WithDecryption=module.params.get('decryption')
         )
-    except botocore.exceptions.ClientError as e:
-        module.fail_json(msg=str(e))
-    return changed, nacl['Parameters']
+    except ClientError, e:
+        module.fail_json(msg=e.message, exception=traceback.format_exc(),
+                         **camel_dict_to_snake_dict(e.response))
+
+    return changed, reponse['Parameters']
 
 
 def delete_parameter(client, module):
     changed = False
+    reponse = {}
 
-    nacl = dict()
+    try:
+        get_reponse = client.get_parameters(
+            Names=[module.params.get('name')]
+        )
+    except ClientError, e:
+        module.fail_json(msg=e.message, exception=traceback.format_exc(),
+                         **camel_dict_to_snake_dict(e.response))
 
-    get_nacl = client.get_parameters(
-        Names=[module.params.get('name')]
-    )
-    if get_nacl['Parameters']:
+    if get_reponse['Parameters']:
         try:
-            nacl = client.delete_parameter(
+            reponse = client.delete_parameter(
                 Name=module.params.get('name')
             )
             changed = True
-        except botocore.exceptions.ClientError as e:
-            module.fail_json(msg=str(e))
-    return changed, nacl
+        except ClientError, e:
+            module.fail_json(msg=e.message, exception=traceback.format_exc(),
+                             **camel_dict_to_snake_dict(e.response))
+
+    return changed, reponse
 
 
 def main():
@@ -231,7 +220,7 @@ def main():
             name=dict(required=True),
             description=dict(),
             value=dict(required=False),
-            state=dict(default='present', choices=['present', 'absent', 'show']),
+            state=dict(default='present', choices=['present', 'absent']),
             string_type=dict(default='String', choices=['String', 'StringList', 'SecureString']),
             decryption=dict(default=True, type='bool'),
             key_id=dict(default='aws/ssm'),
@@ -243,7 +232,7 @@ def main():
 
     if not HAS_BOTO3:
         module.fail_json(msg='boto3 are required.')
-    state = module.params.get('state').lower()
+    state = module.params.get('state')
     try:
         region, ec2_url, aws_connect_kwargs = get_aws_connection_info(module, boto3=True)
         client = boto3_conn(module, conn_type='client', resource='ssm', region=region, endpoint=ec2_url, **aws_connect_kwargs)
@@ -253,10 +242,9 @@ def main():
     invocations = {
         "present": create_update_parameter,
         "absent": delete_parameter,
-        "show": get_parameter,
     }
-    (changed, results) = invocations[state](client, module)
-    module.exit_json(changed=changed, nacl_id=results)
+    (changed, reponse) = invocations[state](client, module)
+    module.exit_json(changed=changed, response=reponse)
 
 if __name__ == '__main__':
     main()

@@ -9,6 +9,11 @@
     name: "Hello"
     state: absent
 
+- name: Delete non-exist key
+  ssm_parameter_store:
+    name: "notkey"
+    state: absent
+
 - name: Create or update secure key/value pair with nominated kms key
   ssm_parameter_store:
     name: "Hello"
@@ -17,39 +22,6 @@
     string_type: "SecureString"
     value: "World"
 
-- name: Retrieving plain-text secret
-  ssm_parameter_store:
-    name: "Hello"
-    state: show
-  register: result
-
-- name: Retrieving plain-text secret with default kms key
-  ssm_parameter_store:
-    name: "Hello"
-    key_id: "aws/ssm"
-    state: show
-  register: result
-
-- name: Retrieving plain-text secret with nominated kms key
-  ssm_parameter_store:
-    name: "Hello"
-    key_id: "alias/demo"
-    state: show
-  register: result
-
-- name: Retrieving secret without decrypted
-  ssm_parameter_store:
-    name: "Hello"
-    decryption: False
-    state: show
-  register: result
-
-- name: Retrieving plain-text secret
-  ssm_parameter_store:
-    name: "Hello"
-    state: show
-  register: result
-
-- debug: msg={{ result.nacl_id }}
-
 - debug: msg="{{ lookup('ssm', 'Hello') }}"
+
+- debug: msg="{{ lookup('ssm', 'NoKey') }}"
