@@ -164,7 +164,7 @@ def create_update_parameter(client, module):
     try:
         reponse = client.put_parameter(**args)
         changed = True
-    except ClientError, e:
+    except ClientError as e:
         module.fail_json(msg=e.message, exception=traceback.format_exc(),
                          **camel_dict_to_snake_dict(e.response))
 
@@ -180,7 +180,7 @@ def get_parameter(client, module):
             Names=[module.params.get('name')],
             WithDecryption=module.params.get('decryption')
         )
-    except ClientError, e:
+    except ClientError as e:
         module.fail_json(msg=e.message, exception=traceback.format_exc(),
                          **camel_dict_to_snake_dict(e.response))
 
@@ -195,7 +195,7 @@ def delete_parameter(client, module):
         get_reponse = client.get_parameters(
             Names=[module.params.get('name')]
         )
-    except ClientError, e:
+    except ClientError as e:
         module.fail_json(msg=e.message, exception=traceback.format_exc(),
                          **camel_dict_to_snake_dict(e.response))
 
@@ -205,7 +205,7 @@ def delete_parameter(client, module):
                 Name=module.params.get('name')
             )
             changed = True
-        except ClientError, e:
+        except ClientError as e:
             module.fail_json(msg=e.message, exception=traceback.format_exc(),
                              **camel_dict_to_snake_dict(e.response))
 

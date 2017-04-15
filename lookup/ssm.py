@@ -45,7 +45,7 @@ class LookupModule(LookupBase):
                     Names=[term],
                     WithDecryption=True
                 )
-            except ClientError, e:
+            except ClientError as e:
                 module.fail_json(msg=e.message, exception=traceback.format_exc(),
                                  **camel_dict_to_snake_dict(e.response))
 
