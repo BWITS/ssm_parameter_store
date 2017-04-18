@@ -3,6 +3,10 @@ ansible module to manage key/value in aws parameter store
 
 Target file: library/ssm_parameter_store.py
 
+### Pull request has been raised to ansible.
+
+https://github.com/ansible/ansible/pull/23460
+
 ### Usage:
 
 ```
