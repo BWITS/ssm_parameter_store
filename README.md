@@ -10,46 +10,35 @@ https://github.com/ansible/ansible/pull/23460
 ### Usage:
 
 ```
-- name: Create or update key/vaule pair in aws parameter store
+- name: Create or update key/value pair in aws parameter store
   ssm_parameter_store:
     name: "Hello"
     description: "This is your first key"
     value: "World"
-  register: result
 
 - name: Delete the key
   ssm_parameter_store:
     name: "Hello"
     state: absent
-  register: result
 
-- name: Create or update secure key/vaule pair in aws parameter store
+- name: Delete non-exist key
+  ssm_parameter_store:
+    name: "notkey"
+    state: absent
+
+- name: Create or update secure key/value pair with nominated kms key
   ssm_parameter_store:
     name: "Hello"
     description: "This is your first key"
+    key_id: "alias/demo"
     string_type: "SecureString"
     value: "World"
-  register: result
 
-- name: Retrieving plain-text secret
-  ssm_parameter_store:
-    name: "Hello"
-    state: show
-  register: result
+- name: recommend to use with ssm lookup plugin
+  debug: msg="{{ lookup('ssm', 'hello') }}"
 
-- name: Retrieving plain-text secret with custom kms key
-  ssm_parameter_store:
-    name: "Hello"
-    key_id: "aws/ssm"
-    state: show
-  register: result
-
-- name: Retrieving secret without decrypted
-  ssm_parameter_store:
-    name: "Hello"
-    decryption: False
-    state: show
-  register: result
+- name: lookup a key which is not exist
+  debug: msg="{{ lookup('ssm', 'NoKey') }}"
 
 ```
 
