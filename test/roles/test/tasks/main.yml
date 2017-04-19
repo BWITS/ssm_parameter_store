@@ -14,6 +14,14 @@
     name: "notkey"
     state: absent
 
+- name: Create or update secure key/value pair in nominated region
+  ssm_parameter_store:
+    name: "Hello"
+    description: "This is your first key"
+    region: us-east-1
+    string_type: "SecureString"
+    value: "World"
+
 - name: Create or update secure key/value pair with nominated kms key
   ssm_parameter_store:
     name: "Hello"

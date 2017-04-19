@@ -67,6 +67,10 @@ options:
       - Boolean
     required: false
     default: True
+  region:
+    description:
+      - region.
+    required: false
 author: Bill Wang (ozbillwang@gmail.com)
 extends_documentation_fragment: aws
 requirements: [ botocore, boto3 ]
@@ -108,34 +112,15 @@ put_parameter:
     description: Add one or more paramaters to the system.
     returned: success
     type: dictionary
-get_parameter:
-    description: Get details of a parameter.
-    returned: success
-    type: dictionary
-    contains:
-        name:
-            description: The name of the parameter.
-            returned: success
-            type: string
-            sample: "Hello"
-        type:
-            description: The type of parameter. Valid values include [ String, StringList, SecureString ]
-            returned: success
-            type: string
-            sample: "String"
-        value:
-            description: The parameter value.
-            returned: success
-            type: string
-            sample: "World"
 delete_parameter:
     description: Delete a parameter from the system.
     returned: success
     type: dictionary
 '''
 
-from ansible.module_utils.ec2 import HAS_BOTO3
+import traceback
 from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.ec2 import HAS_BOTO3, camel_dict_to_snake_dict
 from ansible.module_utils.ec2 import boto3_conn, ec2_argument_spec, get_aws_connection_info
 
 try:
@@ -223,8 +208,9 @@ def main():
             state=dict(default='present', choices=['present', 'absent']),
             string_type=dict(default='String', choices=['String', 'StringList', 'SecureString']),
             decryption=dict(default=True, type='bool'),
-            key_id=dict(default='aws/ssm'),
+            key_id=dict(default="alias/aws/ssm"),
             overwrite=dict(default=True, type='bool'),
+            region=dict(required=False),
         )
     )
 
