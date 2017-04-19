@@ -30,6 +30,12 @@
     string_type: "SecureString"
     value: "World"
 
+- name: Delete key/value pair in nominated region
+  ssm_parameter_store:
+    name: "Hello"
+    region: us-east-1
+    state: absent
+
 - name: recommend to use with ssm lookup plugin
   debug: msg="{{ lookup('ssm', 'Hello' ) }}"
 
