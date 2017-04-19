@@ -17,7 +17,8 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-from ansible.module_utils.ec2 import HAS_BOTO3
+import traceback
+from ansible.module_utils.ec2 import HAS_BOTO3, camel_dict_to_snake_dict
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 

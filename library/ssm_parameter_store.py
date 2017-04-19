@@ -131,7 +131,7 @@ except ImportError:
 
 def create_update_parameter(client, module):
     changed = False
-    reponse = {}
+    response = {}
 
     args = dict(
         Name=module.params.get('name'),
@@ -147,21 +147,21 @@ def create_update_parameter(client, module):
         args.update(KeyId=module.params.get('key_id'))
 
     try:
-        reponse = client.put_parameter(**args)
+        response = client.put_parameter(**args)
         changed = True
     except ClientError as e:
         module.fail_json(msg=e.message, exception=traceback.format_exc(),
                          **camel_dict_to_snake_dict(e.response))
 
-    return changed, reponse
+    return changed, response
 
 
 def get_parameter(client, module):
     changed = False
-    reponse = {}
+    response = {}
 
     try:
-        reponse = client.get_parameters(
+        response = client.get_parameters(
             Names=[module.params.get('name')],
             WithDecryption=module.params.get('decryption')
         )
@@ -169,24 +169,24 @@ def get_parameter(client, module):
         module.fail_json(msg=e.message, exception=traceback.format_exc(),
                          **camel_dict_to_snake_dict(e.response))
 
-    return changed, reponse['Parameters']
+    return changed, response['Parameters']
 
 
 def delete_parameter(client, module):
     changed = False
-    reponse = {}
+    response = {}
 
     try:
-        get_reponse = client.get_parameters(
+        get_response = client.get_parameters(
             Names=[module.params.get('name')]
         )
     except ClientError as e:
         module.fail_json(msg=e.message, exception=traceback.format_exc(),
                          **camel_dict_to_snake_dict(e.response))
 
-    if get_reponse['Parameters']:
+    if get_response['Parameters']:
         try:
-            reponse = client.delete_parameter(
+            response = client.delete_parameter(
                 Name=module.params.get('name')
             )
             changed = True
@@ -194,7 +194,7 @@ def delete_parameter(client, module):
             module.fail_json(msg=e.message, exception=traceback.format_exc(),
                              **camel_dict_to_snake_dict(e.response))
 
-    return changed, reponse
+    return changed, response
 
 
 def main():
@@ -229,8 +229,8 @@ def main():
         "present": create_update_parameter,
         "absent": delete_parameter,
     }
-    (changed, reponse) = invocations[state](client, module)
-    module.exit_json(changed=changed, response=reponse)
+    (changed, response) = invocations[state](client, module)
+    module.exit_json(changed=changed, response=response)
 
 if __name__ == '__main__':
     main()
