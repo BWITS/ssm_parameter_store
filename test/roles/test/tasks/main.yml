@@ -36,14 +36,20 @@
     region: us-east-1
     state: absent
 
-- name: recommend to use with ssm lookup plugin
+- name: lookup ssm parameter store in current region
   debug: msg="{{ lookup('ssm', 'Hello' ) }}"
 
 - name: lookup a key which is not exist
   debug: msg="{{ lookup('ssm', 'NoKey') }}"
 
 - name: lookup a key with key/value pair
-  debug: msg="{{ lookup('ssm', 'Names=Hello' ) }}"
+  debug: msg="{{ lookup('ssm', 'key=Hello' ) }}"
 
-- name: lookup a key with key/value pair in nominated region
-  debug: msg="{{ lookup('ssm', 'Names=Hello region=ap-southeast-2' ) }}"
+- name: lookup ssm paramter store in nominated region
+  debug: msg="{{ lookup('ssm', 'key=Hello region=us-east-2' ) }}"
+
+- name: lookup ssm paramter store in nominated region, key doesn't exist
+  debug: msg="{{ lookup('ssm', 'key=Hello region=us-east-1' ) }}"
+
+- name: lookup ssm paramter store in nominated region
+  debug: msg="{{ lookup('ssm', 'key=Hello region=ap-southeast-2' ) }}"

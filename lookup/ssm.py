@@ -14,6 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
@@ -41,19 +42,21 @@ class LookupModule(LookupBase):
         if not HAS_BOTO3:
             raise AnsibleError('botocore and boto3 are required.')
 
+        # connect to current region
         client = boto3.client('ssm')
 
-        # lookup sample: - debug: msg="{{ lookup('ssm', 'Hello') }}"
+        # get decrypted string as default
+        ssm_dict['WithDecryption'] = True
+
+        # lookup sample:
+        # lookup ssm parameter store in current region
+        # - debug: msg="{{ lookup('ssm', 'Hello') }}"
         if len(ssm_args) == 1 and "=" not in ssm_args[0]:
-            try:
-                response = client.get_parameters(
-                    Names=ssm_args,
-                    WithDecryption=True
-                )
-            except ClientError as e:
-                module.fail_json(msg=e.message, exception=traceback.format_exc(),
-                                 **camel_dict_to_snake_dict(e.response))
-        # lookup sample: - debug: msg="{{ lookup('ssm', 'Names=Hello region=us-east-1') }}"
+            ssm_dict['Names'] = ssm_args
+
+        # lookup sample:
+        # lookup ssm paramter store in nominated region
+        # - debug: msg="{{ lookup('ssm', 'key=Hello region=us-east-1') }}"
         else:
             for param in ssm_args:
                 try:
@@ -61,18 +64,18 @@ class LookupModule(LookupBase):
                 except ClientError as e:
                     raise AnsibleError("ssm paramter store plugin needs key=value pairs, but received %s" % terms)
 
-                if key == "Names":
-                    ssm_dict[key] = [value]
-                else:
-                    ssm_dict[key] = value
+                if key == "key":
+                    ssm_dict['Names'] = [value]
 
-                ssm_dict["WithDecryption"]=True
+                if key == "region":
+                    # connect to nomintated region
+                    client = boto3.client('ssm', region_name=value)
 
-                try:
-                    response = client.get_parameters(**ssm_dict)
-                except ClientError as e:
-                    module.fail_json(msg=e.message, exception=traceback.format_exc(),
-                                    **camel_dict_to_snake_dict(e.response))
+        try:
+            response = client.get_parameters(**ssm_dict)
+        except ClientError as e:
+            module.fail_json(msg=e.message, exception=traceback.format_exc(),
+                             **camel_dict_to_snake_dict(e.response))
 
         ret.update(response)
 
