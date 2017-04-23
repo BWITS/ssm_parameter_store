@@ -33,13 +33,6 @@ https://github.com/ansible/ansible/pull/23460
     key_id: "alias/demo"
     string_type: "SecureString"
     value: "World"
-
-- name: recommend to use with ssm lookup plugin
-  debug: msg="{{ lookup('ssm', 'hello') }}"
-
-- name: lookup a key which is not exist
-  debug: msg="{{ lookup('ssm', 'NoKey') }}"
-
 ```
 
 Example:
@@ -61,6 +54,12 @@ Target file: lookup/ssm.py
 ### Usage:
 
 ```
+- name: lookup ssm parameter store in the current region
+  debug: msg="{{ lookup('ssm', 'Hello' ) }}"
+
+- name: lookup a key with key/value pair
+  debug: msg="{{ lookup('ssm', 'key=Hello' ) }}"
+
 - debug: msg="{{ lookup('ssm', 'foo') }}"
 
 Output: 
