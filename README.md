@@ -42,6 +42,11 @@ https://github.com/ansible/ansible/pull/23460
 
 ```
 
+Example:
+
+[test/roles/test/tasks/main.yml](test/roles/test/tasks/main.yml)
+
+
 ### Reference: 
 
 http://docs.ansible.com/ansible/dev_guide/developing_modules.html
@@ -89,3 +94,7 @@ https://docs.ansible.com/ansible/dev_guide/developing_plugins.html#lookup-plugin
 https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/lookup/credstash.py
 
 https://github.com/jhaals/ansible-vault/blob/master/vault.py
+
+http://russell.ballestrini.net/setting-region-programmatically-in-boto3/
+
+https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/lookup/hashi_vault.py
