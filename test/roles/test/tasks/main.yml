@@ -41,3 +41,9 @@
 
 - name: lookup a key which is not exist
   debug: msg="{{ lookup('ssm', 'NoKey') }}"
+
+- name: lookup a key with key/value pair
+  debug: msg="{{ lookup('ssm', 'Names=Hello' ) }}"
+
+- name: lookup a key with key/value pair in nominated region
+  debug: msg="{{ lookup('ssm', 'Names=Hello region=ap-southeast-2' ) }}"

@@ -35,22 +35,46 @@ class LookupModule(LookupBase):
         ret = {}
         response = {}
 
+        ssm_args = terms[0].split()
+        ssm_dict = {}
+
         if not HAS_BOTO3:
             raise AnsibleError('botocore and boto3 are required.')
 
         client = boto3.client('ssm')
 
-        for term in terms:
+        # lookup sample: - debug: msg="{{ lookup('ssm', 'Hello') }}"
+        if len(ssm_args) == 1 and "=" not in ssm_args[0]:
             try:
                 response = client.get_parameters(
-                    Names=[term],
+                    Names=ssm_args,
                     WithDecryption=True
                 )
             except ClientError as e:
                 module.fail_json(msg=e.message, exception=traceback.format_exc(),
                                  **camel_dict_to_snake_dict(e.response))
+        # lookup sample: - debug: msg="{{ lookup('ssm', 'Names=Hello region=us-east-1') }}"
+        else:
+            for param in ssm_args:
+                try:
+                    key, value = param.split('=')
+                except ClientError as e:
+                    raise AnsibleError("ssm paramter store plugin needs key=value pairs, but received %s" % terms)
 
-            ret.update(response)
+                if key == "Names":
+                    ssm_dict[key] = [value]
+                else:
+                    ssm_dict[key] = value
+
+                ssm_dict["WithDecryption"]=True
+
+                try:
+                    response = client.get_parameters(**ssm_dict)
+                except ClientError as e:
+                    module.fail_json(msg=e.message, exception=traceback.format_exc(),
+                                    **camel_dict_to_snake_dict(e.response))
+
+        ret.update(response)
 
         if ret['Parameters']:
             return [ret['Parameters'][0]['Value']]
