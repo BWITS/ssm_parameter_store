@@ -18,8 +18,7 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-import traceback
-from ansible.module_utils.ec2 import HAS_BOTO3, camel_dict_to_snake_dict
+from ansible.module_utils.ec2 import HAS_BOTO3
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
@@ -59,10 +58,10 @@ class LookupModule(LookupBase):
         # - debug: msg="{{ lookup('ssm', 'key=Hello region=us-east-1') }}"
         else:
             for param in ssm_args:
-                try:
-                    key, value = param.split('=')
-                except ClientError as e:
-                    raise AnsibleError("ssm paramter store plugin needs key=value pairs, but received %s" % terms)
+                if "=" not in param:
+                    raise AnsibleError("ssm parameter store plugin needs key=value pairs, but received %s" % terms)
+
+                key, value = param.split('=')
 
                 if key == "key":
                     ssm_dict['Names'] = [value]
@@ -73,9 +72,8 @@ class LookupModule(LookupBase):
 
         try:
             response = client.get_parameters(**ssm_dict)
-        except ClientError as e:
-            module.fail_json(msg=e.message, exception=traceback.format_exc(),
-                             **camel_dict_to_snake_dict(e.response))
+        except ClientError:
+            raise AnsibleError("ssm paramter store plugin can't get parameters, is AWS access key correct and not expired?")
 
         ret.update(response)
 

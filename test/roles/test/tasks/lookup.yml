@@ -1,0 +1,17 @@
+- name: lookup ssm parameter store in the current region
+  debug: msg="{{ lookup('ssm', 'Hello' ) }}"
+
+- name: lookup a key which doesn't exist
+  debug: msg="{{ lookup('ssm', 'NoKey') }}"
+
+- name: lookup a key with key/value pair
+  debug: msg="{{ lookup('ssm', 'key=Hello' ) }}"
+
+- name: lookup ssm parameter store in nominated region
+  debug: msg="{{ lookup('ssm', 'key=Hello region=us-east-2' ) }}"
+
+- name: lookup ssm parameter store in nominated region, the key doesn't exist
+  debug: msg="{{ lookup('ssm', 'key=Hello region=us-east-1' ) }}"
+
+- name: lookup ssm parameter store in nominated region, the key is in wrong format
+  debug: msg="{{ lookup('ssm', 'Hello us-east-1' ) }}"
