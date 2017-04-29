@@ -54,14 +54,14 @@ class LookupModule(LookupBase):
             ssm_dict['Names'] = ssm_args
 
         # lookup sample:
-        # lookup ssm paramter store in nominated region
+        # lookup ssm parameter store in nominated region
         # - debug: msg="{{ lookup('ssm', 'key=Hello region=us-east-1') }}"
         else:
             for param in ssm_args:
-                if "=" not in param:
+                if "=" in param:
+                    key, value = param.split('=')
+                else:
                     raise AnsibleError("ssm parameter store plugin needs key=value pairs, but received %s" % terms)
-
-                key, value = param.split('=')
 
                 if key == "key":
                     ssm_dict['Names'] = [value]
@@ -73,7 +73,7 @@ class LookupModule(LookupBase):
         try:
             response = client.get_parameters(**ssm_dict)
         except ClientError:
-            raise AnsibleError("ssm paramter store plugin can't get parameters, is AWS access key correct and not expired?")
+            raise AnsibleError("ssm parameter store plugin can't get parameters, is AWS access key correct and not expired?")
 
         ret.update(response)
 
