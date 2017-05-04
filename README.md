@@ -51,24 +51,20 @@ ansible lookup plugin to easily get key-value from aws parameter store
 
 Target file: lookup/ssm.py
 
-### Usage:
+### lookup sample:
 
 ```
-- name: lookup ssm parameter store in the current region
-  debug: msg="{{ lookup('ssm', 'Hello' ) }}"
+# lookup ssm parameter store value in current region
+- debug: msg="{{ lookup('ssm', 'Hello') }}"
 
-- name: lookup a key with key/value pair
-  debug: msg="{{ lookup('ssm', 'key=Hello' ) }}"
+# lookup ssm parameter store, the key is not exist
+- debug: msg="{{ lookup('ssm', 'NoKey') }}"
 
-- debug: msg="{{ lookup('ssm', 'foo') }}"
+# lookup ssm parameter store value in nominated region
+- debug: msg="{{ lookup('ssm', 'Hello', 'region=us-east-1') }}"
 
-Output: 
-
-TASK [debug] *******************************************************************
-ok: [localhost] => {
-    "msg": "Hello World!"
-}
-
+# lookup ssm parameter store value without decrypted"
+- debug: msg="{{ lookup('ssm', 'Hello', 'decrypt=False') }}"
 ```
 
 ### Tutorials
@@ -97,3 +93,5 @@ https://github.com/jhaals/ansible-vault/blob/master/vault.py
 http://russell.ballestrini.net/setting-region-programmatically-in-boto3/
 
 https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/lookup/hashi_vault.py
+
+https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/lookup/__init__.py
