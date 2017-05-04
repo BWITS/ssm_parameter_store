@@ -31,44 +31,48 @@ except ImportError:
 
 class LookupModule(LookupBase):
     def run(self, terms, variables, **kwargs):
+        '''
+        # lookup sample:
+        # lookup ssm parameter store value in current region
+        - debug: msg="{{ lookup('ssm', 'Hello') }}"
+
+        # lookup ssm parameter store, the key is not exist
+        - debug: msg="{{ lookup('ssm', 'NoKey') }}"
+
+        # lookup ssm parameter store value in nominated region
+        - debug: msg="{{ lookup('ssm', 'Hello', 'region=us-east-1') }}"
+
+        # lookup ssm parameter store value without decrypted"
+        - debug: msg="{{ lookup('ssm', 'Hello', 'decrypt=False') }}"
+        '''
 
         ret = {}
         response = {}
-
-        ssm_args = terms[0].split()
         ssm_dict = {}
 
         if not HAS_BOTO3:
             raise AnsibleError('botocore and boto3 are required.')
 
-        # connect to current region
         client = boto3.client('ssm')
+        ssm_dict['WithDecryption'] = bool(True)
+        ssm_dict['Names'] = [terms[0]]
 
-        # get decrypted string as default
-        ssm_dict['WithDecryption'] = True
-
-        # lookup sample:
-        # lookup ssm parameter store in current region
-        # - debug: msg="{{ lookup('ssm', 'Hello') }}"
-        if len(ssm_args) == 1 and "=" not in ssm_args[0]:
-            ssm_dict['Names'] = ssm_args
-
-        # lookup sample:
-        # lookup ssm parameter store in nominated region
-        # - debug: msg="{{ lookup('ssm', 'key=Hello region=us-east-1') }}"
-        else:
-            for param in ssm_args:
+        if len(terms) > 1:
+            for param in terms[1:]:
                 if "=" in param:
                     key, value = param.split('=')
                 else:
-                    raise AnsibleError("ssm parameter store plugin needs key=value pairs, but received %s" % terms)
+                    raise AnsibleError("ssm parameter store plugin needs key=value pairs, but received %s" % param)
 
-                if key == "key":
-                    ssm_dict['Names'] = [value]
-
+                # If no region is set, connect to current region.
                 if key == "region":
-                    # connect to nomintated region
                     client = boto3.client('ssm', region_name=value)
+                else:
+                    client = boto3.client('ssm')
+
+                # decrypt the value or not
+                if key == "decrypt":
+                    ssm_dict['WithDecryption'] = bool(value)
 
         try:
             response = client.get_parameters(**ssm_dict)
