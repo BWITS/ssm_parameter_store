@@ -156,22 +156,6 @@ def create_update_parameter(client, module):
     return changed, response
 
 
-def get_parameter(client, module):
-    changed = False
-    response = {}
-
-    try:
-        response = client.get_parameters(
-            Names=[module.params.get('name')],
-            WithDecryption=module.params.get('decryption')
-        )
-    except ClientError as e:
-        module.fail_json(msg=e.message, exception=traceback.format_exc(),
-                         **camel_dict_to_snake_dict(e.response))
-
-    return changed, response['Parameters']
-
-
 def delete_parameter(client, module):
     changed = False
     response = {}
