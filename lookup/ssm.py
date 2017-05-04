@@ -54,7 +54,7 @@ class LookupModule(LookupBase):
             raise AnsibleError('botocore and boto3 are required.')
 
         client = boto3.client('ssm')
-        ssm_dict['WithDecryption'] = bool(True)
+        ssm_dict['WithDecryption'] = True
         ssm_dict['Names'] = [terms[0]]
 
         if len(terms) > 1:
@@ -64,15 +64,13 @@ class LookupModule(LookupBase):
                 else:
                     raise AnsibleError("ssm parameter store plugin needs key=value pairs, but received %s" % param)
 
-                # If no region is set, connect to current region.
+                # set region
                 if key == "region":
                     client = boto3.client('ssm', region_name=value)
-                else:
-                    client = boto3.client('ssm')
 
                 # decrypt the value or not
-                if key == "decrypt":
-                    ssm_dict['WithDecryption'] = bool(value)
+                if key == "decrypt" and value.lower() == "false":
+                    ssm_dict['WithDecryption'] = False
 
         try:
             response = client.get_parameters(**ssm_dict)
