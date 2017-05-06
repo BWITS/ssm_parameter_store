@@ -33,27 +33,33 @@ class LookupModule(LookupBase):
     def run(self, terms, variables, **kwargs):
         '''
         # lookup sample:
-        # lookup ssm parameter store value in current region
-        - debug: msg="{{ lookup('ssm', 'Hello') }}"
+        - name: lookup ssm parameter store in the current region
+          debug: msg="{{ lookup('ssm', 'Hello' ) }}"
 
-        # lookup ssm parameter store, the key is not exist
-        - debug: msg="{{ lookup('ssm', 'NoKey') }}"
+        - name: lookup a key which doesn't exist, return ""
+          debug: msg="{{ lookup('ssm', 'NoKey') }}"
 
-        # lookup ssm parameter store value in nominated region
-        - debug: msg="{{ lookup('ssm', 'Hello', 'region=us-east-1') }}"
+        - name: lookup ssm parameter store in nominated region
+          debug: msg="{{ lookup('ssm', 'Hello', 'region=us-east-2' ) }}"
 
-        # lookup ssm parameter store value without decrypted"
-        - debug: msg="{{ lookup('ssm', 'Hello', 'decrypt=False') }}"
+        - name: lookup ssm parameter store without decrypted
+          debug: msg="{{ lookup('ssm', 'Hello', 'decrypt=False' ) }}"
+
+        - name: lookup ssm parameter store in nominated aws profile
+          debug: msg="{{ lookup('ssm', 'Hello', 'aws_profile=myprofile' ) }}"
+
+        - name: lookup ssm parameter store with all options.
+          debug: msg="{{ lookup('ssm', 'Hello', 'decrypt=false', 'region=us-east-2', 'aws_profile=myprofile') }}"
         '''
 
         ret = {}
         response = {}
+        session = {}
         ssm_dict = {}
 
         if not HAS_BOTO3:
             raise AnsibleError('botocore and boto3 are required.')
 
-        client = boto3.client('ssm')
         ssm_dict['WithDecryption'] = True
         ssm_dict['Names'] = [terms[0]]
 
@@ -64,13 +70,20 @@ class LookupModule(LookupBase):
                 else:
                     raise AnsibleError("ssm parameter store plugin needs key=value pairs, but received %s" % param)
 
-                # set region
-                if key == "region":
-                    client = boto3.client('ssm', region_name=value)
+                if key == "region" or key == "aws_profile":
+                    session[key] = value
 
                 # decrypt the value or not
                 if key == "decrypt" and value.lower() == "false":
                     ssm_dict['WithDecryption'] = False
+
+        if "aws_profile" in session:
+            boto3.setup_default_session(profile_name=session['aws_profile'])
+
+        if "region" in session:
+            client = boto3.client('ssm', region_name=session['region'])
+        else:
+            client = boto3.client('ssm')
 
         try:
             response = client.get_parameters(**ssm_dict)

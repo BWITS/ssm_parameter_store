@@ -54,17 +54,24 @@ Target file: lookup/ssm.py
 ### lookup sample:
 
 ```
-# lookup ssm parameter store value in current region
-- debug: msg="{{ lookup('ssm', 'Hello') }}"
+# lookup sample:
+- name: lookup ssm parameter store in the current region
+  debug: msg="{{ lookup('ssm', 'Hello' ) }}"
 
-# lookup ssm parameter store, the key is not exist
-- debug: msg="{{ lookup('ssm', 'NoKey') }}"
+- name: lookup a key which doesn't exist, return ""
+  debug: msg="{{ lookup('ssm', 'NoKey') }}"
 
-# lookup ssm parameter store value in nominated region
-- debug: msg="{{ lookup('ssm', 'Hello', 'region=us-east-1') }}"
+- name: lookup ssm parameter store in nominated region
+  debug: msg="{{ lookup('ssm', 'Hello', 'region=us-east-2' ) }}"
 
-# lookup ssm parameter store value without decrypted"
-- debug: msg="{{ lookup('ssm', 'Hello', 'decrypt=False') }}"
+- name: lookup ssm parameter store without decrypted
+  debug: msg="{{ lookup('ssm', 'Hello', 'decrypt=False' ) }}"
+
+- name: lookup ssm parameter store in nominated aws profile
+  debug: msg="{{ lookup('ssm', 'Hello', 'aws_profile=myprofile' ) }}"
+
+- name: lookup ssm parameter store with all options.
+  debug: msg="{{ lookup('ssm', 'Hello', 'decrypt=false', 'region=us-east-2', 'aws_profile=myprofile') }}"
 ```
 
 ### Tutorials
@@ -95,3 +102,9 @@ http://russell.ballestrini.net/setting-region-programmatically-in-boto3/
 https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/lookup/hashi_vault.py
 
 https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/lookup/__init__.py
+
+http://boto3.readthedocs.io/en/latest/reference/core/session.html
+
+http://boto3.readthedocs.io/en/latest/reference/core/boto3.html#boto3.setup_default_session
+
+http://russell.ballestrini.net/filtering-aws-resources-with-boto3/
