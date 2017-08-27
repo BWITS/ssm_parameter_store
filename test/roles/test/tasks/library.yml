@@ -20,7 +20,7 @@
     description: "This is your first key"
     region: us-east-1
     string_type: "SecureString"
-    value: "World at us-east-1" 
+    value: "Hello World at us-east-1"
 
 - name: Create or update secure key/value pair with nominated kms key
   ssm_parameter_store:
@@ -28,10 +28,4 @@
     description: "This is your first key"
     key_id: "alias/demo"
     string_type: "SecureString"
-    value: "World"
-
-- name: Delete key/value pair in nominated region
-  ssm_parameter_store:
-    name: "Hello"
-    region: us-east-1
-    state: absent
+    value: "Hello World"

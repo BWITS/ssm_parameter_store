@@ -1,14 +1,25 @@
----
+sudo: required
 language: python
-python: "2.7"
-
+python:
+  - '2.7'
+  - '3.6'
+cache: pip
 before_install:
-  # Make sure everything's up to date.
   - sudo apt-get update -qq
-
 install:
   # Install Ansible.
-  - pip install ansible boto3
-
+  - if [ "$ANSIBLE_VERSION" = "latest" ]; then sudo pip install ansible; else sudo pip install ansible==$ANSIBLE_VERSION; fi
+  - sudo pip install botocore boto3
 script:
-  - pip install boto3 && cd test && AWS_DEFAULT_REGION=us-east-1 ./cmd.sh --check
+  - cd test
+  - ./cmd.sh
+env:
+  global:
+    - AWS_DEFAULT_REGION: us-east-1
+    - secure: XcwcKcnABW9VbnTZHTSG/UtX5xGCZNpZgySNK5PD0dXi6BsgWtJ3DQitnW3agOnu5+O27QSsLVwFxDPzDaMgQYRT4ctAZMCxZXToY8jhOg8BtZzVXcP07l9cF/HAQNiBf20pg+W+n7GUu92EcV7/7pmw1Q6HjK6aV6MkuMdnWl1ceORimSLmlRIk5Ba+u3im4FtI4ByHZiCaEwhd9iuDNb5B3ld0fS+0SiGNVp3A8AN34tU7Yz2LeG01yDna9R3lNHYGr0/r3LDK7oUMlqpcu1gNbXX/7Z+QBLYBu4hSmXyNUsKE1Vi4prct2U5O5fIIYBBF+lrFIIQpWH+vcVd/9FOclLAnjLX+8SD9436TaQKjlXgzyZHbvtBEPb+SrqXM3B19zBLvcfsrTuEE8ABXn3CM9FNyVBIPjWHUncXgcoCQfobAAm3bpA90pUDf+Gd1lrNN5BNbZTtIVOUVKdnOEEwf59UAAFcrXoZ+jD6xgRmuD/yz0lHXMfDr2ICbYqZ8aaqST/WUUzwIHWawmGIQLbuZu/M8VnfQ43BC6Fzf1LAx7+fpLOxIFGtyv2pVaQDgegOJ2rkD2xBdPw/ETquWt2BcmLasjVA3X5QTin/8WXhO2muNojGSqoD4umK4GT4bKnXn6zY3S1Bi3tYp9+abWVEweZQnlFRCnSQY19rlhgo=
+    - secure: gFOh0buP/WLrTQ06U3GxniVoQs+UcafOci++GnUUkeLbhxiqM9goE+tGZI5gOrkfK/4LXRhjgEoxPtPxy1RDEz7s+ODCKiS9U7H0SCbmy+eceX+stcuYFSthaNpI0afF5N0wK5f+CefZxLZLPA2n35G4/XI/UpKwqO4B8kaFIrvf/JGAsYwwQpusG59WzNyuQIGNWBbEoBtikQoWVr3rPwrbNy4ltkTE2IJcHmWb1Q7P7YKANEVPcidgr9zBllhTMZHFj3LVlv9RAzsdNiSY0DWR5awcZDvK1jTneu48RUxqrdM+hkJXPHl3uwxjnlhiA6foDmIJ1YlY/Ebw3IiiKHq4/QWCysHoAVVBur0rVESQz5lofgvYtVs636tBxAGEKbKbe8Kx17yBZx8M+o+Xdt5vqQyMrX7aP7xKQNYsJ82+RFgaBozEDWZDNahdlbIbJtPYi9QHZP7utbB677NcdLOM8XmRSTEIrVgE+L6t+KiO7BMzP9M3DLTGqsgRARjqayglwfeb1DA7/ulBJHfVZiNNNO4D4jRX0ndWyCUEoHWZn0GwwEC5+UpUqe8bOObK3pRvfpb/Zmj+ji9HVsy6cGgmzA5ftuPNnGqW3WlqME8eAlp8XvW/SnAVK3qY12+Go4wqOdVBz5YEG+rhRH9xgyR8Z7tTrDWh4dwxnj8N1Gw=
+  matrix:
+    - ANSIBLE_VERSION: latest
+    - ANSIBLE_VERSION: 2.3.2.0
+    - ANSIBLE_VERSION: 2.2.3.0
+    - ANSIBLE_VERSION: 2.1.6.0
