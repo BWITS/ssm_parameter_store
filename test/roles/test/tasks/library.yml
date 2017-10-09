@@ -4,6 +4,12 @@
     description: "This is your first key"
     value: "World"
 
+- name: Create or update key/value pair with path in aws parameter store
+  ssm_parameter_store:
+    name: "/path/to/file"
+    description: "This is key with path"
+    value: "World"
+
 - name: Delete the key
   ssm_parameter_store:
     name: "Hello"
