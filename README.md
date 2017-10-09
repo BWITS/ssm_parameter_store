@@ -83,6 +83,7 @@ refer: http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.
 2) run the command 
 ```
 cd test
+pip install -r requirements.txt
 ./cmd.sh
 
 # with verbosse
@@ -108,3 +109,9 @@ http://boto3.readthedocs.io/en/latest/reference/core/session.html
 http://boto3.readthedocs.io/en/latest/reference/core/boto3.html#boto3.setup_default_session
 
 http://russell.ballestrini.net/filtering-aws-resources-with-boto3/
+
+### Contributors
+
+- capusta
+- mtb-xt
+
